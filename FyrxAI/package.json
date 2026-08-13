@@ -1,0 +1,15 @@
+{
+  "name": "fyrxai",
+  "version": "1.0.0",
+  "description": "Drop-in AI-powered Discord support agent — configured entirely via chat commands, no env vars required.",
+  "main": "index.js",
+  "license": "MIT",
+  "peerDependencies": {
+    "discord.js": "^14.27.0"
+  },
+  "dependencies": {
+    "@google/generative-ai": "^0.24.1",
+    "@xenova/transformers": "^2.17.2",
+    "axios": "^1.19.0"
+  }
+}
