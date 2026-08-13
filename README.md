@@ -37,9 +37,18 @@ npm install github:FyrxLab/fyrx-ai
 Then, in your bot's entry file:
 
 ```js
+// CommonJS
 const setupFyrxAI = require('fyrxai');
 setupFyrxAI(client);
 ```
+
+```js
+// ES modules (.mjs, or "type": "module" in your package.json)
+import setupFyrxAI from 'fyrxai';
+setupFyrxAI(client);
+```
+
+Both work out of the box — no separate build, no different import path.
 
 Two things to check on the Discord side:
 
