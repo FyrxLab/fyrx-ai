@@ -7,6 +7,7 @@
 const { commandData, handleInteraction } = require('./lib/slashCommands');
 const { handleSupportMessage } = require('./lib/supportAgent');
 const { checkForUpdate } = require('./lib/updateCheck');
+const { printStartupBanner } = require('./lib/banner');
 
 async function registerCommands(client) {
     try {
@@ -28,7 +29,7 @@ function setupFyrxAI(client) {
     const ready = () => {
         if (registered) return;
         registered = true;
-        registerCommands(client).then(() => console.log('[FyrxAI] Ready — /fyrxai help in any server.'));
+        registerCommands(client).then(() => printStartupBanner(client));
         checkForUpdate();
     };
     client.once('clientReady', ready);
