@@ -9,10 +9,14 @@ const { handleSupportMessage } = require('./lib/supportAgent');
 const { checkForUpdate } = require('./lib/updateCheck');
 const { printStartupBanner } = require('./lib/banner');
 
+// Guild-scoped registration only, deliberately not global: global commands
+// take up to ~1h to propagate and, more importantly, registering BOTH global
+// and per-guild for the same name creates two separate command entries that
+// Discord's client lists as visible duplicates in the picker. Guild-only is
+// instant and has exactly one entry per guild.
 async function registerCommands(client) {
     try {
-        await client.application.commands.set([commandData]); // global, can take up to ~1h to propagate for new guilds
-        await Promise.all(client.guilds.cache.map(g => g.commands.set([commandData]).catch(() => {}))); // instant for guilds already joined
+        await Promise.all(client.guilds.cache.map(g => g.commands.set([commandData]).catch(() => {})));
     } catch (err) {
         console.error('[FyrxAI] Failed to register /fyrxai command:', err.message);
     }

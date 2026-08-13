@@ -22,7 +22,11 @@ at — all configured from Discord chat, no code edits and no environment variab
 - A local, offline embedding model (no API key needed) guesses which documented topic a message
   is about even when it doesn't name it directly; a separate fuzzy (edit-distance) match catches
   spacing/pluralization mismatches and typos in a wiki's name without needing the model at all
-- Basic per-user rate limiting so one person can't drain your AI budget alone
+- Basic per-user rate limiting (with `/fyrxai exempt` to exclude specific users/roles, e.g. mods)
+  so one person can't drain your AI budget alone
+- @mention the bot for a guaranteed answer, bypassing every heuristic gate below — works in any
+  channel, not just configured support ones. @mention it while replying to someone else's message
+  and it answers about *that* message instead of your mention text
 
 ## Install
 
@@ -78,6 +82,9 @@ restrict it in Server Settings → Integrations if needed.
                                             reply is ephemeral — only you see the confirmation
 /fyrxai provider remove
 /fyrxai persona set|remove                 optional extra system-prompt instructions
+/fyrxai exempt adduser|removeuser user     exempt a user from the per-user cooldown
+/fyrxai exempt addrole|removerole role     exempt a role (e.g. moderators) from the cooldown
+/fyrxai exempt list                        list exempt users/roles
 /fyrxai status                             show current config
 /fyrxai help                               full command list
 ```

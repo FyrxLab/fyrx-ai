@@ -1,6 +1,6 @@
 {
   "name": "fyrxai",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "Drop-in AI-powered Discord support agent — configured entirely via chat commands, no env vars required.",
   "main": "index.js",
   "license": "MIT",
