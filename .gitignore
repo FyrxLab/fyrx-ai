@@ -1,6 +1,4 @@
 node_modules/
 .env
-FyrxAI/data/*.json
-FyrxAI/data/.encryption.key
-!FyrxAI/data/.gitkeep
+fyrxai-data/
 *.log

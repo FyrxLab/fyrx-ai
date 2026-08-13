@@ -26,22 +26,38 @@ at — all configured from Discord chat, no code edits and no environment variab
 
 ## Install
 
-1. Copy the `FyrxAI/` folder into your bot's project root.
-2. Install its dependencies (either `cd FyrxAI && npm install`, or merge `FyrxAI/package.json`'s
-   `dependencies` into your own bot's `package.json`).
-3. Make sure your bot has the **Message Content** privileged intent enabled (Discord Developer
-   Portal → Bot → Privileged Gateway Intents), and that `Client` is created with the
-   `GatewayIntentBits.MessageContent` and `GatewayIntentBits.GuildMessages` intents.
-4. Your bot's invite link needs the `applications.commands` OAuth2 scope (alongside `bot`), so
-   Discord lets it register the `/fyrxai` slash command.
-5. In your bot's entry file:
+```bash
+npm install github:FyrxLab/fyrx-ai
+```
+
+Then, in your bot's entry file:
 
 ```js
-const setupFyrxAI = require('./FyrxAI');
+const setupFyrxAI = require('fyrxai');
 setupFyrxAI(client);
 ```
 
-That's it — no other wiring needed.
+Two things to check on the Discord side:
+
+1. Your bot needs the **Message Content** privileged intent enabled (Discord Developer Portal →
+   Bot → Privileged Gateway Intents), and `Client` created with the `GatewayIntentBits.MessageContent`
+   and `GatewayIntentBits.GuildMessages` intents.
+2. Your bot's invite link needs the `applications.commands` OAuth2 scope (alongside `bot`), so
+   Discord lets it register the `/fyrxai` slash command.
+
+That's it — no other wiring, no config files, no env vars.
+
+### Staying up to date
+
+`npm install` resolves the package to a specific commit and stays there — it will **not**
+silently pull in future changes on its own (deliberately: an auto-updating dependency would mean
+every bot using this runs whatever lands in a future push, with no review). On startup, FyrxAI
+checks GitHub for a newer tagged release and logs a line if one exists — it only informs, it never
+applies anything. When you see that log line, update explicitly:
+
+```bash
+npm update fyrxai
+```
 
 ## Configure (in Discord)
 
@@ -68,9 +84,10 @@ restrict it in Server Settings → Integrations if needed.
 
 `provider set`'s reply is ephemeral (Discord's own "only visible to you" flag) — the key is never
 posted as plain text in the channel, and there's no message to delete. Keys are stored
-AES-256-GCM-encrypted on disk with a key generated automatically on first run
-(`FyrxAI/data/.encryption.key`) — back that file up if you move servers, or the stored keys become
-unreadable and you'll need to `provider set` again.
+AES-256-GCM-encrypted on disk with a key generated automatically on first run, in a `fyrxai-data/`
+folder created in your bot's own working directory (not inside `node_modules`, so it survives
+redeploys/`npm ci`) — add `fyrxai-data/` to your `.gitignore`, and back it up if you move hosts, or
+the stored keys become unreadable and you'll need to `provider set` again.
 
 ## Supported providers
 

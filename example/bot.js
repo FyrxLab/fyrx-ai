@@ -4,7 +4,7 @@
  */
 
 const { Client, GatewayIntentBits } = require('discord.js');
-const setupFyrxAI = require('../FyrxAI');
+const setupFyrxAI = require('..');
 
 const client = new Client({
     intents: [

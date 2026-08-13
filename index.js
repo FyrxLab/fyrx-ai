@@ -1,11 +1,12 @@
 /**
  * FyrxAI — drop-in AI support agent for discord.js bots.
- * Usage: require('./FyrxAI')(client);  (after client.login, or before — it
+ * Usage: require('fyrxai')(client);  (after client.login, or before — it
  * only attaches listeners, order doesn't matter)
  */
 
 const { commandData, handleInteraction } = require('./lib/slashCommands');
 const { handleSupportMessage } = require('./lib/supportAgent');
+const { checkForUpdate } = require('./lib/updateCheck');
 
 async function registerCommands(client) {
     try {
@@ -28,6 +29,7 @@ function setupFyrxAI(client) {
         if (registered) return;
         registered = true;
         registerCommands(client).then(() => console.log('[FyrxAI] Ready — /fyrxai help in any server.'));
+        checkForUpdate();
     };
     client.once('clientReady', ready);
     client.once('ready', ready);
