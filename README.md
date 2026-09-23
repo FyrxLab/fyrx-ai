@@ -31,20 +31,20 @@ at — all configured from Discord chat, no code edits and no environment variab
 ## Install
 
 ```bash
-npm install github:FyrxLab/fyrx-ai
+npm install @fyrx/fyrxai
 ```
 
 Then, in your bot's entry file:
 
 ```js
 // CommonJS
-const setupFyrxAI = require('fyrxai');
+const setupFyrxAI = require('@fyrx/fyrxai');
 setupFyrxAI(client);
 ```
 
 ```js
 // ES modules (.mjs, or "type": "module" in your package.json)
-import setupFyrxAI from 'fyrxai';
+import setupFyrxAI from '@fyrx/fyrxai';
 setupFyrxAI(client);
 ```
 
@@ -69,7 +69,7 @@ checks GitHub for a newer tagged release and logs a line if one exists — it on
 applies anything. When you see that log line, update explicitly:
 
 ```bash
-npm update fyrxai
+npm update @fyrx/fyrxai
 ```
 
 ## Configure (in Discord)
