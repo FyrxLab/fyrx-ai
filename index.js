@@ -5,7 +5,8 @@
  */
 
 const { commandData, trainCommands, handleInteraction } = require('./lib/slashCommands');
-const { handleSupportMessage } = require('./lib/supportAgent');
+const { handleSupportMessage, ensureIndexes } = require('./lib/supportAgent');
+const { getGuildConfig } = require('./lib/config');
 const { checkForUpdate } = require('./lib/updateCheck');
 const { printStartupBanner } = require('./lib/banner');
 const logger = require('./lib/logger');
@@ -38,6 +39,8 @@ function setupFyrxAI(client) {
         if (registered) return;
         registered = true;
         registerCommands(client).then(() => printStartupBanner(client));
+        // Build missing wiki indexes now, not on the first user's message.
+        for (const g of client.guilds.cache.values()) ensureIndexes(g.id, getGuildConfig(g.id).wikis).catch(err => logger.error('[FyrxAI] Index build failed:', err.message));
         checkForUpdate();
     };
     client.once('clientReady', ready);
