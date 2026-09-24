@@ -15,9 +15,10 @@ const logger = require('./lib/logger');
 // and per-guild for the same name creates two separate command entries that
 // Discord's client lists as visible duplicates in the picker. Guild-only is
 // instant and has exactly one entry per guild.
+// create() upserts by name; set() would overwrite every other addon's guild commands.
 async function registerCommands(client) {
     try {
-        await Promise.all(client.guilds.cache.map(g => g.commands.set([commandData]).catch(() => {})));
+        await Promise.all(client.guilds.cache.map(g => g.commands.create(commandData).catch((err) => logger.error('[FyrxAI] Failed to register command in guild ' + g.id + ':', err.message))));
     } catch (err) {
         logger.error('[FyrxAI] Failed to register /fyrxai command:', err.message);
     }
@@ -41,7 +42,7 @@ function setupFyrxAI(client) {
     client.once('clientReady', ready);
     client.once('ready', ready);
 
-    client.on('guildCreate', (guild) => guild.commands.set([commandData]).catch(() => {}));
+    client.on('guildCreate', (guild) => guild.commands.create(commandData).catch((err) => logger.error('[FyrxAI] Failed to register command in guild ' + guild.id + ':', err.message)));
 
     client.on('interactionCreate', async (interaction) => {
         try {
