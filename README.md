@@ -6,27 +6,23 @@ at — all configured from Discord chat, no code edits and no environment variab
 
 ## What it does
 
-- Watches your configured support channels and answers questions automatically (no mention needed)
-- `/fyrxai wiki add` **crawls the whole doc site**, not just the page you pasted — tries
-  `llms.txt`, then `sitemap.xml`, then follows same-origin links one hop out
-- Automatically extracts up to 100 keywords from the crawled content by pattern (headers, inline
-  code, `/commands`, `%placeholders%`) — no AI needed for this part, so topic detection has real
-  coverage from the moment a wiki is added, even before any AI provider is configured. If a
-  provider *is* configured, its own AI-generated keyword pass is merged in on top.
-- Configured entirely through the `/fyrxai` slash command — hidden from non-managers by Discord's
-  own permission system, and the provider API key confirmation is ephemeral (visible only to
-  whoever ran the command, never posted as plain text in the channel)
-- Replies as a branded embed, not a plain message
-- Supports **WaveSpeed**, **OpenRouter**, **Google AI Studio**, and **Claude Platform** as the
-  answering model — pick one per server
-- A local, offline embedding model (no API key needed) guesses which documented topic a message
-  is about even when it doesn't name it directly; a separate fuzzy (edit-distance) match catches
-  spacing/pluralization mismatches and typos in a wiki's name without needing the model at all
-- Basic per-user rate limiting (with `/fyrxai exempt` to exclude specific users/roles, e.g. mods)
-  so one person can't drain your AI budget alone
-- @mention the bot for a guaranteed answer, bypassing every heuristic gate below — works in any
-  channel, not just configured support ones. @mention it while replying to someone else's message
-  and it answers about *that* message instead of your mention text
+- Watches your configured support channels and answers support questions automatically (no mention needed)
+- **Decides locally, for free, what deserves an answer** - a k-NN intent classifier over a local multilingual
+  embedding model (`Xenova/paraphrase-multilingual-MiniLM-L12-v2`, ONNX, CPU, ~15 ms per message) tells
+  support questions from casual chat and off-topic tasks, and a local semantic index of your wikis checks the
+  message is actually about them. Chat never reaches the paid AI.
+- **Trainable from Discord**: right-click any message → Apps → *FyrxAI: soporte / charla / fuera de tema*.
+  Each server's labels outweigh the built-in examples, so it learns how your community talks.
+- **Support only**: regular members get wiki-grounded support; requests to write/debug code or unrelated
+  questions get a free canned refusal. Server administrators can @mention it for anything.
+- Sends the AI only the passages relevant to the question (~3-4k tokens instead of the whole wiki), found by
+  meaning, so a Spanish question finds an English page
+- `/fyrxai wiki add` crawls a whole doc site (`llms.txt`, `sitemap.xml`, or links one hop out) **or reads a local
+  folder** of `.md`/`.txt` files; `/fyrxai wiki refresh` re-downloads only the pages it already knows - no AI,
+  no rediscovery (pass `rediscover:true` to look for new pages)
+- Supports **WaveSpeed**, **OpenRouter**, **Google AI Studio**, and **Claude Platform** as the answering model
+- Per-user rate limiting, a per-server hourly cap on AI answers, and a `debug.txt` explaining every decision
+- @mention the bot while replying to someone's message and it answers about *that* message
 
 ## Install
 
@@ -80,15 +76,10 @@ restrict it in Server Settings → Integrations if needed.
 
 ```
 /fyrxai channel add|remove|list           channels where FyrxAI answers automatically
-/fyrxai wiki add name url [description]   crawl a doc site and add it as a source; description is
-                                            optional and feeds topic detection alongside the
-                                            crawled content
-/fyrxai wiki refresh name                  re-crawl an existing wiki (same URL) after upstream
-                                            docs change
+/fyrxai wiki add name url [description]   crawl a doc site (or a local folder path) and index it locally
+/fyrxai wiki refresh name [rediscover]     re-download the known pages and re-index (no AI)
 /fyrxai wiki remove|list
-/fyrxai provider set provider model apikey pick the model that answers questions (also used to
-                                            generate topic keywords when you add/refresh a wiki);
-                                            reply is ephemeral — only you see the confirmation
+/fyrxai provider set provider model apikey pick the model that answers questions; reply is ephemeral
 /fyrxai provider remove
 /fyrxai persona set|remove                 optional extra system-prompt instructions
 /fyrxai exempt adduser|removeuser user     exempt a user from the per-user cooldown
@@ -117,24 +108,19 @@ the stored keys become unreadable and you'll need to `provider set` again.
 | Google AI Studio | `googleai`       | via `@google/generative-ai`, e.g. `gemini-2.0-flash` |
 | Claude Platform | `claude`          | Anthropic Messages API directly, e.g. `claude-3-5-haiku-20241022` |
 
-## Topic detection
+## How a message is handled
 
-Three layers, cheapest first:
+| Situation | What happens | Cost |
+|---|---|---|
+| Support channel, looks like chat / not about the wikis | ignored | free |
+| Support channel, support question about the wikis | AI answer with the relevant passages (stays silent if the AI judges it off-topic) | ~4k tokens |
+| @mention, asks for code / unrelated task | canned "support only" reply | free |
+| @mention, greeting or nothing in the wikis | canned reply | free |
+| @mention, support question | AI answer | ~4k tokens |
+| @mention by a server admin (or the owner ID) | AI answer, unrestricted | varies |
 
-1. **Exact match** — the wiki's name appears literally in the message.
-2. **Fuzzy match** — edit-distance (Levenshtein) tolerant of spacing/pluralization differences and
-   typos in the wiki's *name itself* (e.g. "conditional event" still matches a wiki named
-   `conditionalevents`). This is plain string matching, not AI — semantic embedding models aren't
-   built to be typo-tolerant, so this layer exists specifically because the local model isn't the
-   right tool for that job.
-3. **Local semantic model** (`Xenova/paraphrase-MiniLM-L3-v2`, ONNX, offline, no API key) — for
-   messages that describe a problem without naming the wiki at all. Reference vectors come from
-   the wiki's name + description run through several paraphrase templates, *plus* every keyword
-   from the crawl embedded individually (regex-extracted automatically, and AI-generated on top
-   if a provider is configured) — the keyword list is what gives this layer real coverage of the
-   topic's actual vocabulary instead of just a one-line description. A match needs to both clear a
-   similarity threshold and beat the runner-up topic by a margin, to cut down on
-   confident-but-wrong guesses.
+Each decision is logged in `debug.txt` with `intent`, `conf` and `rel` (wiki relevance) so you can see why.
+If it misjudges your server's messages, label a few with the context menu - that fixes it without code.
 
 ## License
 
