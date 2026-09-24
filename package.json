@@ -1,6 +1,6 @@
 {
   "name": "@fyrx/fyrxai",
-  "version": "1.3.2",
+  "version": "1.3.3",
   "description": "Drop-in AI-powered Discord support agent — configured entirely via chat commands, no env vars required.",
   "main": "index.js",
   "exports": {
