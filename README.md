@@ -94,6 +94,9 @@ restrict it in Server Settings → Integrations if needed.
 /fyrxai exempt adduser|removeuser user     exempt a user from the per-user cooldown
 /fyrxai exempt addrole|removerole role     exempt a role (e.g. moderators) from the cooldown
 /fyrxai exempt list                        list exempt users/roles
+/fyrxai limit calls_per_hour                hard cap of paid AI answers per hour for this server (default 30, 0 = never)
+/fyrxai logs console:true|false            print log lines to the console, or keep them only in debug.txt
+/fyrxai debug                              sends you debug.txt (ephemeral)
 /fyrxai status                             show current config
 /fyrxai help                               full command list
 ```
@@ -136,3 +139,12 @@ Three layers, cheapest first:
 ## License
 
 MIT — see [LICENSE](LICENSE). Use it in any bot, commercial or not.
+
+## Debugging
+
+Everything the module does internally (every decision to answer/skip a message with its reason, each
+AI call with provider/model/latency/sizes, config commands run, errors) is always appended to
+`fyrxai-data/debug.txt` (rotated at 2 MB to `debug.old.txt`). API keys are never logged. Run `/fyrxai debug`
+to get the file as an ephemeral attachment when asking for help; it contains short fragments of
+messages from support channels, so share it only with whoever is helping you. `/fyrxai logs console:false`
+stops the console output without stopping the file.

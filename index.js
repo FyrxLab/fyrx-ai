@@ -8,6 +8,7 @@ const { commandData, handleInteraction } = require('./lib/slashCommands');
 const { handleSupportMessage } = require('./lib/supportAgent');
 const { checkForUpdate } = require('./lib/updateCheck');
 const { printStartupBanner } = require('./lib/banner');
+const logger = require('./lib/logger');
 
 // Guild-scoped registration only, deliberately not global: global commands
 // take up to ~1h to propagate and, more importantly, registering BOTH global
@@ -18,7 +19,7 @@ async function registerCommands(client) {
     try {
         await Promise.all(client.guilds.cache.map(g => g.commands.set([commandData]).catch(() => {})));
     } catch (err) {
-        console.error('[FyrxAI] Failed to register /fyrxai command:', err.message);
+        logger.error('[FyrxAI] Failed to register /fyrxai command:', err.message);
     }
 }
 
@@ -27,6 +28,7 @@ async function registerCommands(client) {
  *   log in) discord.js Client with the MessageContent intent enabled.
  */
 function setupFyrxAI(client) {
+    logger.log(`[FyrxAI] starting v${require('./package.json').version} node=${process.version} console=${logger.getSettings().consoleLogs ? 'on' : 'off'}`);
     // discord.js renamed 'ready' to 'clientReady' but both currently fire on
     // v14 (only 'clientReady' will remain in v15) - guard so this only runs once.
     let registered = false;
@@ -45,7 +47,7 @@ function setupFyrxAI(client) {
         try {
             await handleInteraction(interaction);
         } catch (err) {
-            console.error('[FyrxAI] Unhandled interaction error:', err);
+            logger.error('[FyrxAI] Unhandled interaction error:', err);
         }
     });
 
@@ -54,7 +56,7 @@ function setupFyrxAI(client) {
         try {
             await handleSupportMessage(message);
         } catch (err) {
-            console.error('[FyrxAI] Unhandled error:', err);
+            logger.error('[FyrxAI] Unhandled error:', err);
         }
     });
 }
